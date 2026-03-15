@@ -1,0 +1,32 @@
+name: Dagelijkse Goud Scrape
+
+on:
+  schedule:
+    - cron: '0 9 * * *'  # Elke dag om 09:00 uur 's ochtends
+  workflow_dispatch:      # Hiermee kun je het ook handmatig testen
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code ophalen
+        uses: actions/checkout@v3
+
+      - name: Python installeren
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Hulpstukken installeren
+        run: pip install -r requirements.txt
+
+      - name: Scraper uitvoeren
+        run: python scraper.py
+
+      - name: Resultaten opslaan in GitHub
+        run: |
+          git config --global user.name 'Goud-Bot'
+          git config --global user.email 'bot@github.com'
+          git add goudprijzen.csv
+          git commit -m "Update goudprijzen $(date)" || exit 0
+          git push
